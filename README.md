@@ -29,14 +29,12 @@ Because you deserve a nice blog! This makes it easy for you - just you!
 
 See it for your self!
 
-
 - [Simple Markdown → article](https://blog-template-5f0.pages.dev/space/reading-the-sun)
-- [Peek the source code](./src/content/space/reading-the-sun.md)
+    - [Peek the source code](./src/content/posts/space/reading-the-sun.md)
 
 
 - [Markdown + D3 → interactive content](https://blog-template-5f0.pages.dev/topic/space/solar-system/)
 
----
 
 **How it works**
 
