@@ -1,0 +1,23 @@
+---
+import { getTopicUrl } from '../../utils/posts';
+import { topics } from '../../utils/topics';
+
+const defaultTopicUrl = getTopicUrl(topics[0]?.key ?? '');
+const redirectUrl = topics[0] ? defaultTopicUrl : '/';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content={`0; url=${redirectUrl}`} />
+    <meta name="robots" content="noindex" />
+    <title>Redirecting...</title>
+    <script is:inline define:vars={{ redirectUrl }}>
+      window.location.replace(redirectUrl);
+    </script>
+  </head>
+  <body>
+    <a href={redirectUrl}>Continue to topics</a>
+  </body>
+</html>

@@ -1,0 +1,123 @@
+---
+const stars = [
+  { name: 'Sirius', type: 'A-type main sequence', distance: '8.6 ly', tone: '#b9d9ff', x: '16%', y: '38%', size: '1.05rem' },
+  { name: 'Vega', type: 'A-type main sequence', distance: '25 ly', tone: '#d7e8ff', x: '36%', y: '20%', size: '0.85rem' },
+  { name: 'Betelgeuse', type: 'Red supergiant', distance: '548 ly', tone: '#ff8b5c', x: '63%', y: '47%', size: '1.55rem' },
+  { name: 'Rigel', type: 'Blue supergiant', distance: '860 ly', tone: '#91c4ff', x: '78%', y: '24%', size: '1.25rem' },
+  { name: 'Proxima Centauri', type: 'Red dwarf', distance: '4.24 ly', tone: '#ff715f', x: '51%', y: '72%', size: '0.65rem' },
+];
+---
+
+<figure class="star-cluster" aria-labelledby="star-cluster-title">
+  <div class="star-cluster__sky" aria-hidden="true">
+    {stars.map((star) => (
+      <span
+        class="star-cluster__star"
+        style={`--x: ${star.x}; --y: ${star.y}; --size: ${star.size}; --tone: ${star.tone};`}
+      ></span>
+    ))}
+  </div>
+
+  <figcaption class="star-cluster__caption">
+    <p id="star-cluster-title">Five reference stars</p>
+    <dl>
+      {stars.map((star) => (
+        <div>
+          <dt>{star.name}</dt>
+          <dd>{star.type} · {star.distance}</dd>
+        </div>
+      ))}
+    </dl>
+  </figcaption>
+</figure>
+
+<style>
+  .star-cluster {
+    margin: 2.5rem 0;
+    border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border-soft));
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #080b14;
+    color: #f8fafc;
+  }
+
+  .star-cluster__sky {
+    position: relative;
+    min-height: clamp(18rem, 44vw, 31rem);
+    background:
+      radial-gradient(circle at 22% 28%, rgba(99, 102, 241, 0.24), transparent 24%),
+      radial-gradient(circle at 76% 66%, rgba(14, 165, 233, 0.18), transparent 27%),
+      linear-gradient(145deg, #050712 0%, #111827 54%, #06131d 100%);
+  }
+
+  .star-cluster__sky::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, rgba(255, 255, 255, 0.82) 0 1px, transparent 1.5px),
+      radial-gradient(circle, rgba(255, 255, 255, 0.52) 0 1px, transparent 1.3px);
+    background-position: 0 0, 34px 51px;
+    background-size: 72px 72px, 118px 118px;
+    opacity: 0.48;
+  }
+
+  .star-cluster__star {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--size);
+    aspect-ratio: 1;
+    border-radius: 999px;
+    background: var(--tone);
+    box-shadow:
+      0 0 1.3rem color-mix(in srgb, var(--tone) 84%, transparent),
+      0 0 3.5rem color-mix(in srgb, var(--tone) 44%, transparent);
+    transform: translate(-50%, -50%);
+  }
+
+  .star-cluster__caption {
+    display: grid;
+    gap: 1rem;
+    padding: 1.2rem;
+    background: color-mix(in srgb, #0f172a 92%, white);
+  }
+
+  .star-cluster__caption p,
+  .star-cluster__caption dl,
+  .star-cluster__caption dt,
+  .star-cluster__caption dd {
+    margin: 0;
+  }
+
+  .star-cluster__caption p {
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #bfdbfe;
+  }
+
+  .star-cluster__caption dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem 1.2rem;
+  }
+
+  .star-cluster__caption dt {
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  .star-cluster__caption dd {
+    margin-top: 0.2rem;
+    color: #cbd5e1;
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 640px) {
+    .star-cluster__caption dl {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

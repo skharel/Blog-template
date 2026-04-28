@@ -1,0 +1,691 @@
+---
+import ThemeSwitcher from '../components/ThemeSwitcher.astro';
+import '../styles/variables.css';
+
+interface Props {
+  title?: string;
+  chrome?: 'default' | 'home';
+}
+
+const { title = 'The Distributed Mind', chrome = 'default' } = Astro.props;
+const pathname = Astro.url.pathname;
+const navState =
+  pathname === '/'
+    ? 'home'
+    : pathname.startsWith('/about')
+      ? 'about'
+    : pathname.startsWith('/topic')
+      ? 'topics'
+      : 'home';
+---
+
+<!DOCTYPE html>
+<html lang="en" data-theme="violet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="color-scheme" content="light dark" />
+    <script is:inline>
+      const storedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const resolvedTheme = storedTheme || (prefersDark ? 'dark' : 'violet');
+      document.documentElement.dataset.theme = resolvedTheme;
+    </script>
+    <style>
+      :global(*) {
+        box-sizing: border-box;
+      }
+
+      :global(html) {
+        background: var(--page-bg);
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--font-main);
+        background: var(--page-bg);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      body.body--home {
+        background: var(--page-bg);
+      }
+
+      :global(a) {
+        color: inherit;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        z-index: 100;
+        border-bottom: 1px solid var(--border-soft);
+        background: var(--surface-header);
+        backdrop-filter: blur(14px);
+        box-shadow: var(--header-shadow);
+        transition: box-shadow 180ms ease, backdrop-filter 180ms ease, background-color 180ms ease;
+      }
+
+      .site-header.is-scrolled {
+        box-shadow: var(--header-shadow);
+        backdrop-filter: blur(14px);
+      }
+
+      .site-header__inner {
+        width: min(calc(100% - 2rem), var(--content-max-width));
+        margin: 0 auto;
+      }
+
+      .site-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        height: 64px;
+        min-height: 64px;
+        padding: 0;
+      }
+
+      .site-nav--home {
+        height: 64px;
+        min-height: 64px;
+      }
+
+      .site-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        min-width: 0;
+        text-decoration: none;
+      }
+
+      .site-brand__mark {
+        width: 1.2rem;
+        height: 1.2rem;
+        flex: 0 0 auto;
+        border-radius: 999px;
+        background:
+          radial-gradient(circle at center, var(--accent) 0 28%, transparent 29%),
+          radial-gradient(circle at 15% 30%, var(--accent-soft) 0 10%, transparent 11%),
+          radial-gradient(circle at 78% 20%, var(--accent-soft) 0 10%, transparent 11%),
+          radial-gradient(circle at 75% 80%, var(--accent-soft) 0 10%, transparent 11%);
+      }
+
+      .site-brand__title,
+      .site-brand__subtitle {
+        margin: 0;
+      }
+
+      .site-brand__title {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .site-brand__subtitle {
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+
+      .site-header--home .site-brand__mark {
+        background:
+          radial-gradient(circle at center, var(--accent) 0 28%, transparent 29%),
+          radial-gradient(circle at 15% 30%, var(--accent-soft) 0 10%, transparent 11%),
+          radial-gradient(circle at 78% 20%, var(--accent-soft) 0 10%, transparent 11%),
+          radial-gradient(circle at 75% 80%, var(--accent-soft) 0 10%, transparent 11%);
+      }
+
+      .site-header--home .site-brand__title {
+        font-family: var(--font-main);
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .site-header--home .site-brand__subtitle {
+        display: none;
+      }
+
+      .site-nav__desktop {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .site-links {
+        display: flex;
+        align-items: center;
+        gap: 1.35rem;
+        padding: 0;
+        background: transparent;
+        border: 0;
+      }
+
+      .site-links a {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0;
+        border-radius: 0;
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-weight: 600;
+        transition: color 150ms ease, box-shadow 150ms ease;
+      }
+
+      .site-links a:hover,
+      .site-links a:focus-visible {
+        color: var(--text-primary);
+        outline: none;
+      }
+
+      .site-links a.is-active,
+      .site-mobile-links a.is-active {
+        color: var(--text-primary);
+        box-shadow: inset 0 -2px 0 var(--accent);
+      }
+
+      .site-header--home .site-links a {
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 400;
+      }
+
+      .site-header--home .site-links a:hover,
+      .site-header--home .site-links a:focus-visible {
+        color: var(--accent);
+      }
+
+      .site-header--home .site-links a.is-active {
+        color: var(--text-primary);
+        box-shadow: inset 0 -2px 0 var(--accent);
+      }
+
+      .site-theme-control {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: auto;
+        height: 2.125rem;
+        flex: 0 0 auto;
+        margin-left: 0.75rem;
+        padding-left: 1.15rem;
+        position: relative;
+      }
+
+      .site-theme-control::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 3px;
+        height: 1.35rem;
+        background: var(--border-strong);
+        transform: translateY(-50%);
+      }
+
+      .site-nav__toggle {
+        display: none;
+        width: 2.75rem;
+        height: 2.75rem;
+        border: 1px solid var(--border-soft);
+        border-radius: 999px;
+        background: var(--surface-header);
+        color: var(--text-primary);
+        padding: 0;
+        cursor: pointer;
+        margin-right: 0.2rem;
+      }
+
+      .site-header--home .site-nav__toggle {
+        border-color: var(--border-soft);
+        background: var(--surface-header);
+      }
+
+      .site-nav__toggle-lines {
+        width: 1.1rem;
+        height: 0.85rem;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .site-nav__toggle-lines::before,
+      .site-nav__toggle-lines::after,
+      .site-nav__toggle-lines span {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        border-radius: 999px;
+        background: currentColor;
+      }
+
+      .site-nav__toggle-lines::before {
+        top: 0;
+      }
+
+      .site-nav__toggle-lines span {
+        top: calc(50% - 1px);
+      }
+
+      .site-nav__toggle-lines::after {
+        bottom: 0;
+      }
+
+      .site-mobile-panel {
+        display: none;
+        margin-top: 0.75rem;
+        padding: 0.75rem 0.65rem 0.6rem;
+        border: 1px solid color-mix(in srgb, var(--border-subtle) 72%, transparent);
+        border-radius: calc(var(--content-radius) + 0.15rem);
+        background: var(--surface-panel);
+        box-shadow: 0 16px 36px rgba(16, 24, 40, 0.06);
+      }
+
+      .site-mobile-panel[data-open='true'] {
+        display: grid;
+        gap: 1.1rem;
+      }
+
+      .site-mobile-links {
+        display: grid;
+        gap: 0.2rem;
+      }
+
+      .site-mobile-links a {
+        position: relative;
+        padding: 1rem 1rem 1rem 1.25rem;
+        border-radius: 1rem;
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-size: 1rem;
+        font-weight: 600;
+        background: transparent;
+        border: 0;
+      }
+
+      .site-mobile-links a:hover,
+      .site-mobile-links a:focus-visible {
+        background: var(--accent-soft);
+        color: var(--text-primary);
+        outline: none;
+      }
+
+      .site-mobile-links a.is-active {
+        background: var(--accent-soft);
+        color: var(--text-primary);
+        box-shadow: none;
+      }
+
+      .site-mobile-links a.is-active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.45rem;
+        bottom: 0.45rem;
+        width: 0.2rem;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      .site-mobile-theme {
+        display: grid;
+        gap: 0.85rem;
+        padding-top: 1.15rem;
+        padding-inline: 0.2rem;
+        margin-top: 0.45rem;
+        border-top: 1px solid var(--border-soft);
+      }
+
+      .site-mobile-theme__label {
+        margin: 0;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-weight: 600;
+        line-height: 1;
+      }
+
+      .site-mobile-theme__palette {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        align-items: center;
+      }
+
+      .site-mobile-theme__button {
+        width: 2.2rem;
+        height: 2.2rem;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border-radius: 999px;
+        border: 1px solid var(--border-soft);
+        background: var(--surface-header);
+        cursor: pointer;
+        transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+      }
+
+      .site-mobile-theme__button:hover,
+      .site-mobile-theme__button:focus-visible {
+        transform: translateY(-1px);
+        border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+        outline: none;
+      }
+
+      .site-mobile-theme__button.is-active {
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent);
+      }
+
+      .site-mobile-theme__swatch {
+        width: 1.05rem;
+        height: 1.05rem;
+        display: block;
+        border-radius: 999px;
+      }
+
+      .site-mobile-theme__swatch--violet {
+        background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+      }
+
+      .site-mobile-theme__swatch--forest {
+        background: linear-gradient(135deg, #19765d, #5cb39b);
+      }
+
+      .site-mobile-theme__swatch--amber {
+        background: linear-gradient(135deg, #b06e26, #d5aa74);
+      }
+
+      .site-mobile-theme__swatch--ocean {
+        background: linear-gradient(135deg, #257aa8, #66b8de);
+      }
+
+      .site-mobile-theme__swatch--rose {
+        background: linear-gradient(135deg, #be5e84, #e2a1b7);
+      }
+
+      .site-mobile-theme__swatch--dark {
+        background: linear-gradient(135deg, #0b0b0a 0%, #151410 58%, #b89a5e 100%);
+      }
+
+      .page-main {
+        width: min(100%, var(--content-max-width));
+        margin: 0 auto;
+      }
+
+      .page-main--home {
+        width: 100%;
+      }
+
+      .page-main--default {
+        padding: 1.5rem 0 4rem;
+      }
+
+      .page-main--home {
+        padding: 1.5rem 0 3rem;
+      }
+
+      @media (min-width: 1024px) {
+        .site-header__inner {
+          width: min(calc(100% - 2rem), 1320px);
+        }
+      }
+
+      @media (max-width: 900px) {
+        .site-header__inner,
+        .page-main {
+          width: min(calc(100% - 1rem), var(--page-max-width));
+        }
+
+        .page-main--home {
+          width: 100%;
+        }
+
+        .site-nav,
+        .site-nav--home {
+          height: 64px;
+          min-height: 64px;
+          gap: 0.7rem;
+        }
+
+        .site-nav__desktop {
+          display: none;
+        }
+
+        .site-brand {
+          flex: 1 1 auto;
+          gap: 0.7rem;
+          max-width: calc(100% - 3.5rem);
+        }
+
+        .site-brand__title {
+          font-size: 0.98rem;
+        }
+
+        .site-nav__toggle {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 auto;
+          margin-right: 0;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .site-header__inner,
+        .page-main {
+          width: min(calc(100% - 0.75rem), var(--page-max-width));
+        }
+
+        .page-main--home {
+          width: 100%;
+        }
+
+        .site-brand {
+          gap: 0.55rem;
+          max-width: calc(100% - 3.15rem);
+        }
+
+        .site-brand__mark {
+          width: 1rem;
+          height: 1rem;
+        }
+
+        .site-brand__title {
+          font-size: 0.92rem;
+        }
+      }
+    </style>
+  </head>
+  <body class:list={[`body--${chrome}`]}>
+    <header class:list={['site-header', chrome === 'home' && 'site-header--home']}>
+      <div class="site-header__inner">
+        <nav class:list={['site-nav', chrome === 'home' && 'site-nav--home']} aria-label="Primary">
+          <a class="site-brand" href="/">
+            <span class="site-brand__mark" aria-hidden="true"></span>
+            <span>
+              <span class="site-brand__title">The Distributed Mind</span>
+            </span>
+          </a>
+
+          <div class="site-nav__desktop">
+            <div class="site-links">
+              <a href="/" data-nav-key="home" class:list={{ 'is-active': navState === 'home' }}>Home</a>
+              <a href="/topic" data-nav-key="topics" class:list={{ 'is-active': navState === 'topics' }}>Topics</a>
+              <a href="/about" data-nav-key="about" class:list={{ 'is-active': navState === 'about' }}>About</a>
+            </div>
+            <div class="site-theme-control">
+              <ThemeSwitcher />
+            </div>
+          </div>
+
+          <button
+            class="site-nav__toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="site-mobile-panel"
+            aria-label="Open navigation menu"
+          >
+            <span class="site-nav__toggle-lines"><span></span></span>
+          </button>
+        </nav>
+
+        <div id="site-mobile-panel" class="site-mobile-panel" data-open="false">
+          <div class="site-mobile-links">
+            <a href="/" data-mobile-nav-close data-nav-key="home" class:list={{ 'is-active': navState === 'home' }}>Home</a>
+            <a href="/topic" data-mobile-nav-close data-nav-key="topics" class:list={{ 'is-active': navState === 'topics' }}>Topics</a>
+            <a href="/about" data-mobile-nav-close data-nav-key="about" class:list={{ 'is-active': navState === 'about' }}>About</a>
+          </div>
+          <div class="site-mobile-theme">
+            <p class="site-mobile-theme__label">Theme</p>
+            <div class="site-mobile-theme__palette" role="group" aria-label="Theme colors">
+              <button type="button" class="site-mobile-theme__button" data-theme-select="violet" aria-label="Switch to Violet theme">
+                <span class="site-mobile-theme__swatch site-mobile-theme__swatch--violet"></span>
+              </button>
+              <button type="button" class="site-mobile-theme__button" data-theme-select="forest" aria-label="Switch to Forest theme">
+                <span class="site-mobile-theme__swatch site-mobile-theme__swatch--forest"></span>
+              </button>
+              <button type="button" class="site-mobile-theme__button" data-theme-select="amber" aria-label="Switch to Amber theme">
+                <span class="site-mobile-theme__swatch site-mobile-theme__swatch--amber"></span>
+              </button>
+              <button type="button" class="site-mobile-theme__button" data-theme-select="ocean" aria-label="Switch to Ocean theme">
+                <span class="site-mobile-theme__swatch site-mobile-theme__swatch--ocean"></span>
+              </button>
+              <button type="button" class="site-mobile-theme__button" data-theme-select="rose" aria-label="Switch to Rose theme">
+                <span class="site-mobile-theme__swatch site-mobile-theme__swatch--rose"></span>
+              </button>
+              <button type="button" class="site-mobile-theme__button" data-theme-select="dark" aria-label="Switch to Dark theme">
+                <span class="site-mobile-theme__swatch site-mobile-theme__swatch--dark"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="site-shell">
+      <main class:list={['page-main', chrome === 'home' ? 'page-main--home' : 'page-main--default']}>
+        <slot />
+      </main>
+    </div>
+
+    <script is:inline>
+      const themeButtons = document.querySelectorAll('[data-theme-select]');
+      const root = document.documentElement;
+      const themeSwitchers = document.querySelectorAll('.theme-switcher');
+      const navLinks = document.querySelectorAll('[data-nav-key]');
+      const siteHeader = document.querySelector('.site-header');
+      const mobileMenuToggle = document.querySelector('.site-nav__toggle');
+      const mobileMenuPanel = document.querySelector('#site-mobile-panel');
+      const mobileMenuLinks = document.querySelectorAll('[data-mobile-nav-close]');
+
+      const setMobileMenuOpen = (isOpen) => {
+        if (!(mobileMenuToggle instanceof HTMLButtonElement) || !(mobileMenuPanel instanceof HTMLElement)) return;
+        mobileMenuToggle.setAttribute('aria-expanded', String(isOpen));
+        mobileMenuPanel.dataset.open = String(isOpen);
+      };
+
+      const syncThemeState = () => {
+        const activeTheme = root.dataset.theme;
+        themeButtons.forEach((button) => {
+          const isActive = button.getAttribute('data-theme-select') === activeTheme;
+          button.classList.toggle('is-active', isActive);
+          button.setAttribute('aria-pressed', String(isActive));
+        });
+      };
+
+      themeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const nextTheme = button.getAttribute('data-theme-select');
+          if (!nextTheme) return;
+          root.dataset.theme = nextTheme;
+          localStorage.setItem('theme', nextTheme);
+          syncThemeState();
+        });
+      });
+
+      syncThemeState();
+
+      if (mobileMenuToggle instanceof HTMLButtonElement) {
+        mobileMenuToggle.addEventListener('click', () => {
+          const isOpen = mobileMenuToggle.getAttribute('aria-expanded') === 'true';
+          setMobileMenuOpen(!isOpen);
+        });
+      }
+
+      mobileMenuLinks.forEach((link) => {
+        link.addEventListener('click', () => setMobileMenuOpen(false));
+      });
+
+      const syncNavState = () => {
+        const { pathname, hash } = window.location;
+        let activeKey = 'home';
+
+        if (pathname.startsWith('/topic')) {
+          activeKey = 'topics';
+        } else if (pathname.startsWith('/about')) {
+          activeKey = 'about';
+        } else if (pathname === '/' && hash === '#topics') {
+          activeKey = 'topics';
+        }
+
+        navLinks.forEach((link) => {
+          const isActive = link.getAttribute('data-nav-key') === activeKey;
+          link.classList.toggle('is-active', isActive);
+          if (isActive) {
+            link.setAttribute('aria-current', activeKey === 'topics' && pathname === '/' ? 'location' : 'page');
+          } else {
+            link.removeAttribute('aria-current');
+          }
+        });
+      };
+
+      const syncHeaderScrollState = () => {
+        if (!(siteHeader instanceof HTMLElement)) return;
+        siteHeader.classList.toggle('is-scrolled', window.scrollY > 6);
+      };
+
+      syncNavState();
+      syncHeaderScrollState();
+      window.addEventListener('hashchange', syncNavState);
+      window.addEventListener('scroll', syncHeaderScrollState, { passive: true });
+
+      document.addEventListener('click', (event) => {
+        themeSwitchers.forEach((switcher) => {
+          if (!(switcher instanceof HTMLDetailsElement) || !switcher.open) return;
+          if (switcher.contains(event.target)) return;
+          switcher.open = false;
+        });
+
+        if (
+          mobileMenuPanel instanceof HTMLElement &&
+          mobileMenuToggle instanceof HTMLButtonElement &&
+          mobileMenuPanel.dataset.open === 'true' &&
+          !mobileMenuPanel.contains(event.target) &&
+          !mobileMenuToggle.contains(event.target)
+        ) {
+          setMobileMenuOpen(false);
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        themeSwitchers.forEach((switcher) => {
+          if (switcher instanceof HTMLDetailsElement) {
+            switcher.open = false;
+          }
+        });
+        setMobileMenuOpen(false);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,544 @@
+---
+import { ArrowRight, CarFront, Leaf, Orbit, Rocket } from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { formatDate } from '../utils/date';
+import { getPostTopic, getPostUrl, getPublishedPosts, getTopicUrl } from '../utils/posts';
+import { getReadingTime } from '../utils/readingTime';
+import { topics } from '../utils/topics';
+
+const posts = await getPublishedPosts();
+const latestPosts = posts.slice(0, 5);
+
+const featuredPicks = topics
+  .map((topic) => {
+    const post = posts.find((entry) => getPostTopic(entry) === topic.key);
+    return post ? { topic, post } : null;
+  })
+  .filter((entry) => entry !== null);
+
+const topicIcons = {
+  space: Orbit,
+  rocket: Rocket,
+  nature: Leaf,
+  cars: CarFront,
+} as const;
+
+const featuredMediaClasses = {
+  space: 'featured-card__media--space',
+  rocket: 'featured-card__media--rocket',
+  nature: 'featured-card__media--nature',
+  cars: 'featured-card__media--cars',
+} as const;
+---
+
+<BaseLayout chrome="home" title="The Distributed Mind">
+  <section class="home-page">
+    <section class="home-top">
+      <section class="home-hero">
+        <span class="home-hero__accent" aria-hidden="true"></span>
+        <h1>
+          Milky way galaxy -
+          <br />
+          where we all <span>belong.</span>
+        </h1>
+        <p class="home-hero__lede">
+          Exploring the cosmos, technology, nature, and the machines we build. Ideas that connect us across infinite
+          distances.
+        </p>
+      </section>
+
+      <aside class="latest-writing" aria-labelledby="latest-writing-title">
+        <p class="section-label">Latest writing</p>
+        <h2 id="latest-writing-title" class="sr-only">Latest writing</h2>
+        <div class="latest-writing__list">
+          {latestPosts.map((post) => {
+            const topicKey = getPostTopic(post) as keyof typeof topicIcons;
+            const Icon = topicIcons[topicKey] ?? Orbit;
+
+            return (
+              <a class="latest-writing__item" href={getPostUrl(post)}>
+                <div class="latest-writing__icon">
+                  <Icon size={22} />
+                </div>
+                <div class="latest-writing__body">
+                  <h3>{post.data.title}</h3>
+                  <p>
+                    <span>{formatDate(post.data.pubDate)}</span>
+                    <span>{getReadingTime(post.body)} min read</span>
+                  </p>
+                </div>
+                <ArrowRight class="latest-writing__arrow" size={20} />
+              </a>
+            );
+          })}
+        </div>
+      </aside>
+    </section>
+
+    <section class="topic-row" id="topics" aria-labelledby="topic-row-title">
+      <p class="section-label">Topics</p>
+      <div class="topic-row__items" id="topic-row-title">
+        {topics.map((topic) => {
+          const Icon = topicIcons[topic.key as keyof typeof topicIcons];
+
+          return (
+            <a class="topic-row__item" href={getTopicUrl(topic.key)}>
+              <span class="topic-row__icon">
+                <Icon size={16} />
+              </span>
+              <span class="topic-row__text">{topic.title}</span>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+
+    <section class="featured-picks" aria-labelledby="featured-picks-title">
+      <div class="featured-picks__header">
+        <p class="section-label">Featured picks</p>
+      </div>
+
+      <div class="featured-picks__grid" id="featured-picks-title">
+        {featuredPicks.map(({ topic, post }) => (
+          <article class="featured-card">
+            <a class={`featured-card__media ${featuredMediaClasses[topic.key as keyof typeof featuredMediaClasses]}`} href={getPostUrl(post)}>
+              <span class="featured-card__glow" aria-hidden="true"></span>
+            </a>
+            <div class="featured-card__content">
+              <h2>
+                <a href={getPostUrl(post)}>{post.data.title}</a>
+              </h2>
+              <p>
+                <span>{formatDate(post.data.pubDate)}</span>
+                <span>{getReadingTime(post.body)} min read</span>
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  </section>
+
+  <style>
+    .home-page {
+      display: grid;
+      gap: 3.5rem;
+      width: min(100%, 76rem);
+      margin: 0 auto;
+      padding-inline: 1.5rem;
+      --home-brand: var(--accent);
+      --home-brand-soft: var(--accent-soft);
+      --home-text: var(--text-1);
+      --home-muted: var(--text-3);
+      --home-line: color-mix(in srgb, var(--accent) 12%, transparent);
+      --home-surface: var(--surface-elevated);
+    }
+
+    .home-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 3rem;
+      align-items: start;
+    }
+
+    .home-hero {
+      display: grid;
+      gap: 1.75rem;
+      align-content: start;
+      min-height: 100%;
+      max-width: 32.5rem;
+      padding-top: 3.6rem;
+    }
+
+    .home-hero__accent {
+      width: 4rem;
+      height: 0.22rem;
+      border-radius: 999px;
+      background: var(--home-brand);
+    }
+
+    .home-hero h1,
+    .home-hero__lede {
+      margin: 0;
+    }
+
+    .home-hero h1 {
+      font-family: var(--font-main);
+      font-size: clamp(2.2rem, 3.6vw, 3.1rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.05em;
+      max-width: 9.2ch;
+      color: var(--home-text);
+      margin-bottom: 0.3rem;
+    }
+
+    .home-hero h1 span {
+      color: var(--home-brand);
+    }
+
+    .home-hero__lede {
+      max-width: 28rem;
+      color: var(--home-muted);
+      font-size: clamp(1.125rem, 2vw, 1.5rem);
+      line-height: 1.55;
+    }
+
+    .section-label {
+      margin: 0;
+      color: var(--home-brand);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .latest-writing {
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+      padding-top: 2.7rem;
+    }
+
+    .latest-writing__list {
+      display: grid;
+      gap: 0;
+    }
+
+    .latest-writing__item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 1.2rem;
+      align-items: center;
+      padding: 0.95rem 0.25rem 0.95rem 0;
+      text-decoration: none;
+      border-bottom: 1px solid var(--home-line);
+      border-radius: 0;
+      transition: background-color 180ms ease, color 180ms ease;
+    }
+
+    .latest-writing__item:hover,
+    .latest-writing__item:focus-visible {
+      background: color-mix(in srgb, var(--home-brand-soft) 12%, white);
+      outline: none;
+    }
+
+    .latest-writing__item:hover .latest-writing__arrow,
+    .latest-writing__item:focus-visible .latest-writing__arrow {
+      transform: translateX(4px);
+    }
+
+    .latest-writing__icon {
+      width: 4.15rem;
+      height: 4.15rem;
+      display: grid;
+      place-items: center;
+      border-radius: 1rem;
+      color: var(--home-brand);
+      background: color-mix(in srgb, var(--home-brand-soft) 44%, white);
+    }
+
+    .latest-writing__body {
+      min-width: 0;
+      display: grid;
+      align-content: center;
+      gap: 0.2rem;
+    }
+
+    .latest-writing__body h3,
+    .latest-writing__body p {
+      margin: 0;
+    }
+
+    .latest-writing__body h3 {
+      font-size: clamp(1.18rem, 1.5vw, 1.38rem);
+      line-height: 1.16;
+      letter-spacing: -0.04em;
+      color: var(--home-text);
+    }
+
+    .latest-writing__body p {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem 0.9rem;
+      color: var(--home-muted);
+      font-size: 0.92rem;
+      opacity: 0.74;
+    }
+
+    .latest-writing__body p span + span::before,
+    .featured-card__content p span + span::before {
+      content: '•';
+      margin-right: 0.95rem;
+      color: var(--text-3);
+    }
+
+    .latest-writing__arrow {
+      color: var(--home-brand);
+      flex: 0 0 auto;
+      align-self: center;
+      transition: transform 180ms ease;
+      margin-right: 0.2rem;
+    }
+
+    .topic-row {
+      display: grid;
+      gap: 0.95rem;
+    }
+
+    .topic-row__items {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .topic-row__item {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      min-width: 0;
+      text-decoration: none;
+      font-size: 1.08rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      padding: 0.8rem 0.95rem;
+      border-radius: 1rem;
+      transition: background-color 180ms ease, transform 180ms ease;
+    }
+
+    .topic-row__item:hover,
+    .topic-row__item:focus-visible {
+      background: color-mix(in srgb, var(--home-brand-soft) 42%, white);
+      transform: scale(1.02);
+      outline: none;
+    }
+
+    .topic-row__icon {
+      width: 3.1rem;
+      height: 3.1rem;
+      display: grid;
+      place-items: center;
+      border-radius: 0.95rem;
+      color: var(--home-brand);
+      background: color-mix(in srgb, var(--home-brand-soft) 68%, white);
+      transition: transform 180ms ease, background-color 180ms ease, color 180ms ease;
+      flex: 0 0 auto;
+    }
+
+    .topic-row__item:hover .topic-row__icon,
+    .topic-row__item:focus-visible .topic-row__icon {
+      transform: scale(1.05);
+      background: var(--home-brand);
+      color: white;
+    }
+
+    .featured-picks {
+      display: grid;
+      gap: 1.2rem;
+    }
+
+    .featured-picks__grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1.4rem;
+    }
+
+    .featured-card {
+      display: grid;
+      gap: 0.85rem;
+      align-content: start;
+    }
+
+    .featured-card__media {
+      position: relative;
+      display: block;
+      aspect-ratio: 16 / 9;
+      border-radius: 1.25rem;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
+      text-decoration: none;
+      transition: transform 180ms ease;
+    }
+
+    .featured-card__media--space {
+      background:
+        radial-gradient(circle at 45% 48%, rgba(255, 241, 216, 0.95) 0 10%, rgba(244, 160, 105, 0.5) 16%, transparent 34%),
+        radial-gradient(circle at 26% 28%, rgba(196, 154, 255, 0.45) 0 6%, transparent 16%),
+        radial-gradient(circle at 68% 32%, rgba(103, 126, 234, 0.35) 0 8%, transparent 18%),
+        linear-gradient(135deg, #0d1027, #26103b 45%, #102b57 100%);
+    }
+
+    .featured-card__media--rocket {
+      background:
+        radial-gradient(circle at 50% 78%, rgba(255, 233, 196, 0.95) 0 8%, rgba(255, 173, 83, 0.5) 16%, transparent 36%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 44%),
+        linear-gradient(160deg, #283559 0%, #5a3f65 45%, #ff9f68 100%);
+    }
+
+    .featured-card__media--nature {
+      background:
+        radial-gradient(circle at 58% 30%, rgba(255, 240, 185, 0.82) 0 10%, rgba(255, 240, 185, 0.18) 18%, transparent 34%),
+        linear-gradient(90deg, rgba(27, 51, 29, 0.88) 0 8%, transparent 8% 14%, rgba(31, 61, 35, 0.9) 14% 20%, transparent 20% 28%, rgba(22, 44, 26, 0.88) 28% 34%, transparent 34% 42%, rgba(30, 56, 34, 0.88) 42% 48%, transparent 48% 56%, rgba(29, 50, 31, 0.88) 56% 63%, transparent 63% 72%, rgba(20, 42, 25, 0.88) 72% 80%, transparent 80%),
+        linear-gradient(160deg, #162814, #244527 55%, #6d8e3e 100%);
+    }
+
+    .featured-card__media--cars {
+      background:
+        linear-gradient(180deg, rgba(255, 184, 145, 0.18), transparent 45%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0) 0 64%, rgba(44, 50, 72, 0.7) 64% 100%),
+        linear-gradient(160deg, #6d5879 0%, #d38a86 44%, #2f4568 100%);
+    }
+
+    .featured-card__glow {
+      position: absolute;
+      inset: auto auto 1.2rem 1.2rem;
+      width: 5.4rem;
+      height: 5.4rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      filter: blur(18px);
+    }
+
+    .featured-card__content {
+      display: grid;
+      gap: 0.95rem;
+    }
+
+    .featured-card__content h2,
+    .featured-card__content p {
+      margin: 0;
+    }
+
+    .featured-card__content h2 {
+      font-size: 1.08rem;
+      line-height: 1.32;
+      letter-spacing: -0.03em;
+      color: var(--home-text);
+    }
+
+    .featured-card__content h2 a {
+      text-decoration: none;
+    }
+
+    .featured-card__content p {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem 0.9rem;
+      color: var(--home-muted);
+      font-size: 0.9rem;
+      opacity: 0.72;
+    }
+
+    .featured-card:hover .featured-card__media,
+    .featured-card:focus-within .featured-card__media {
+      transform: scale(1.02);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1100px) {
+      .home-page {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .home-top {
+        display: contents;
+      }
+
+      .home-hero {
+        order: 1;
+      }
+
+      .topic-row {
+        order: 2;
+      }
+
+      .latest-writing {
+        order: 3;
+      }
+
+      .featured-picks {
+        order: 4;
+      }
+
+      .home-top {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+
+      .home-hero {
+        max-width: 32.5rem;
+        padding-top: 1.25rem;
+      }
+
+      .latest-writing {
+        padding-top: 0;
+      }
+
+      .topic-row__items {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .featured-picks__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 767px) {
+      .home-page {
+        gap: 3.25rem;
+        padding-inline: 1rem;
+      }
+
+      .home-hero h1 {
+        font-size: 2.625rem;
+        max-width: 100%;
+      }
+
+      .home-hero__lede {
+        max-width: 100%;
+        font-size: 1.125rem;
+      }
+
+      .latest-writing__item {
+        grid-template-columns: auto minmax(0, 1fr);
+        padding-right: 0;
+      }
+
+      .latest-writing__arrow {
+        display: none;
+      }
+
+      .topic-row__items {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.8rem;
+      }
+
+      .topic-row__item {
+        padding: 0.72rem 0.8rem;
+        font-size: 1rem;
+      }
+
+      .topic-row__icon {
+        width: 2.85rem;
+        height: 2.85rem;
+      }
+
+      .featured-picks__grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</BaseLayout>

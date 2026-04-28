@@ -1,0 +1,326 @@
+---
+import { ArrowRight, BriefcaseBusiness, Code } from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const socialLinks = [
+  
+  {
+    label: 'GitHub',
+    href: 'https://github.com/skharel/Blog-template',
+    Icon: Code,
+  },
+];
+---
+
+<BaseLayout chrome="home" title="About | The Distributed Mind">
+  <section class="about-page" aria-labelledby="about-title">
+    <div class="about-page__inner">
+      <div class="about-page__copy">
+        <p class="about-page__eyebrow">About</p>
+        <h1 id="about-title">Blog Template</h1>
+        <span class="about-page__accent" aria-hidden="true"></span>
+
+        <div class="about-page__text">
+          <p>
+            Wanted to build your blog? Now you can get started using this template. 
+          </p>
+          <p> See github link for the code. </p>
+        </div>
+
+        <div class="about-page__socials" aria-label="Social links">
+          {socialLinks.map(({ label, href, Icon }) => (
+            <a class="about-page__social-link" href={href} target="_blank" rel="noreferrer">
+              <span class="about-page__social-icon" aria-hidden="true">
+                <Icon size={24} stroke-width={2.5} />
+              </span>
+              <span>{label}</span>
+              <ArrowRight class="about-page__social-arrow" size={23} stroke-width={2.35} aria-hidden="true" />
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div class="about-page__visual" aria-hidden="true">
+        <span class="about-page__block about-page__block--back"></span>
+        <span class="about-page__block about-page__block--middle"></span>
+        <span class="about-page__block about-page__block--base"></span>
+        <span class="about-page__sphere"></span>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .about-page {
+      width: 100%;
+      min-height: calc(100vh - 64px);
+      padding: clamp(8rem, 14vw, 13.8rem) 1.5rem clamp(4.5rem, 9vw, 8rem);
+      overflow: hidden;
+    }
+
+    .about-page__inner {
+      width: min(100%, 76rem);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(22rem, 1.05fr);
+      gap: clamp(2.25rem, 6vw, 5.5rem);
+      align-items: center;
+    }
+
+    .about-page__copy {
+      display: grid;
+      align-content: start;
+      justify-items: start;
+      gap: 1.8rem;
+      min-width: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .about-page__eyebrow,
+    .about-page__text p,
+    .about-page__copy h1 {
+      margin: 0;
+    }
+
+    .about-page__eyebrow {
+      color: var(--accent);
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .about-page__copy h1 {
+      max-width: 9.8ch;
+      color: var(--text-primary);
+      font-size: clamp(3.6rem, 7vw, 5.25rem);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 1.02;
+    }
+
+    .about-page__accent {
+      width: 3.45rem;
+      height: 0.22rem;
+      border-radius: 999px;
+      background: var(--accent);
+      margin-top: 0.55rem;
+    }
+
+    .about-page__text {
+      display: grid;
+      gap: 1.65rem;
+      max-width: 35.5rem;
+      margin-top: 0.5rem;
+      color: var(--text-primary);
+      font-size: clamp(1.08rem, 1.7vw, 1.35rem);
+      line-height: 1.78;
+    }
+
+    .about-page__socials {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.6rem 2.45rem;
+      align-items: center;
+      margin-top: 0.45rem;
+    }
+
+    .about-page__social-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      min-height: 3.4rem;
+      color: var(--text-primary);
+      font-size: 1.05rem;
+      font-weight: 500;
+      line-height: 1;
+      text-decoration: none;
+      transition: color 160ms ease, transform 160ms ease;
+    }
+
+    .about-page__social-link:hover,
+    .about-page__social-link:focus-visible {
+      color: var(--accent);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .about-page__social-icon {
+      width: 3.4rem;
+      height: 3.4rem;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
+      border-radius: 0.7rem;
+      color: var(--accent);
+      background: color-mix(in srgb, var(--surface-main) 74%, var(--accent-soft));
+      box-shadow:
+        inset 0 1px 0 color-mix(in srgb, white 80%, transparent),
+        0 14px 28px -22px color-mix(in srgb, var(--accent) 50%, transparent);
+      transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+    }
+
+    .about-page__social-link:hover .about-page__social-icon,
+    .about-page__social-link:focus-visible .about-page__social-icon {
+      border-color: color-mix(in srgb, var(--accent) 34%, transparent);
+      background: color-mix(in srgb, var(--accent-soft) 78%, var(--surface-main));
+    }
+
+    .about-page__social-arrow {
+      color: var(--accent);
+      transition: transform 160ms ease;
+    }
+
+    .about-page__social-link:hover .about-page__social-arrow,
+    .about-page__social-link:focus-visible .about-page__social-arrow {
+      transform: translateX(4px);
+    }
+
+    .about-page__visual {
+      position: relative;
+      min-height: clamp(27rem, 47vw, 42rem);
+      align-self: end;
+      margin-right: calc(clamp(0rem, 4vw, 3rem) * -1);
+      transform: translateY(1.25rem);
+    }
+
+    .about-page__block,
+    .about-page__sphere {
+      position: absolute;
+      display: block;
+    }
+
+    .about-page__block {
+      border: 1px solid color-mix(in srgb, var(--accent) 9%, white);
+      background:
+        linear-gradient(145deg, color-mix(in srgb, white 92%, var(--accent-soft)) 0%, color-mix(in srgb, var(--accent-soft) 38%, white) 58%, color-mix(in srgb, var(--accent) 22%, var(--surface-main)) 100%);
+      box-shadow:
+        inset 12px 14px 30px color-mix(in srgb, white 62%, transparent),
+        inset -22px -18px 42px color-mix(in srgb, var(--accent) 12%, transparent),
+        0 28px 54px -26px color-mix(in srgb, var(--accent) 48%, transparent);
+    }
+
+    .about-page__block--back {
+      width: clamp(15rem, 27vw, 24.5rem);
+      height: clamp(18rem, 30vw, 27rem);
+      right: -1.4rem;
+      top: 2.7rem;
+      border-radius: 3.2rem 3.2rem 1.1rem 1.1rem;
+      opacity: 0.8;
+    }
+
+    .about-page__block--middle {
+      width: clamp(18rem, 33vw, 29rem);
+      height: clamp(13rem, 20vw, 18rem);
+      right: 2.1rem;
+      bottom: 8.7rem;
+      border-radius: 3rem 3rem 1rem 1rem;
+      z-index: 2;
+    }
+
+    .about-page__block--base {
+      width: clamp(24rem, 44vw, 39.5rem);
+      height: clamp(10rem, 18vw, 15.5rem);
+      right: -1.2rem;
+      bottom: 0;
+      border-radius: 3.1rem 3.1rem 1.45rem 1.45rem;
+      z-index: 3;
+    }
+
+    .about-page__sphere {
+      width: clamp(8.25rem, 14vw, 13rem);
+      aspect-ratio: 1;
+      right: clamp(9.2rem, 18vw, 16.2rem);
+      bottom: clamp(8.4rem, 14vw, 12.4rem);
+      z-index: 4;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.72) 0 9%, transparent 22%),
+        radial-gradient(circle at 66% 75%, color-mix(in srgb, var(--accent-strong) 92%, black) 0 21%, transparent 54%),
+        linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 76%, white) 0%, var(--accent) 52%, color-mix(in srgb, var(--accent-strong) 86%, black) 100%);
+      box-shadow:
+        inset 14px 16px 32px rgba(255, 255, 255, 0.28),
+        inset -18px -24px 42px color-mix(in srgb, var(--accent-strong) 58%, transparent),
+        0 25px 28px -20px color-mix(in srgb, var(--text-primary) 48%, transparent),
+        0 42px 64px -38px color-mix(in srgb, var(--accent) 76%, transparent);
+    }
+
+    @media (max-width: 960px) {
+      .about-page {
+        padding-top: clamp(4rem, 10vw, 6.5rem);
+      }
+
+      .about-page__inner {
+        grid-template-columns: 1fr;
+        gap: 3.5rem;
+      }
+
+      .about-page__copy h1 {
+        max-width: 10.5ch;
+      }
+
+      .about-page__visual {
+        width: min(100%, 43rem);
+        min-height: clamp(25rem, 70vw, 35rem);
+        margin: 0 auto;
+        transform: none;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .about-page {
+        padding: 3.25rem 1rem 4.5rem;
+      }
+
+      .about-page__copy {
+        gap: 1.35rem;
+      }
+
+      .about-page__copy h1 {
+        max-width: 100%;
+        font-size: clamp(3rem, 14vw, 4.2rem);
+      }
+
+      .about-page__text {
+        font-size: 1.05rem;
+        line-height: 1.68;
+      }
+
+      .about-page__socials {
+        width: 100%;
+        gap: 0.95rem;
+      }
+
+      .about-page__social-link {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .about-page__visual {
+        min-height: 22rem;
+        margin-top: -0.5rem;
+      }
+
+      .about-page__block--back {
+        right: -2.8rem;
+      }
+
+      .about-page__block--middle {
+        right: 0.6rem;
+        bottom: 6.5rem;
+      }
+
+      .about-page__block--base {
+        right: -2.4rem;
+        width: min(118%, 29rem);
+      }
+
+      .about-page__sphere {
+        right: 9rem;
+        bottom: 7.15rem;
+      }
+    }
+  </style>
+</BaseLayout>

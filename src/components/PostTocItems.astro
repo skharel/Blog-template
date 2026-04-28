@@ -1,0 +1,163 @@
+---
+type TocItem = {
+  depth: number;
+  slug: string;
+  text: string;
+  children: TocItem[];
+};
+
+interface Props {
+  items: TocItem[];
+  listClass?: string;
+}
+
+const { items, listClass = 'post-toc-sublist' } = Astro.props;
+---
+
+<ol class={listClass}>
+  {items.map((item) => (
+    <li class={`post-toc-sublist__item${item.children.length > 0 ? ' has-children' : ''}`} data-depth={item.depth}>
+      <span class="post-toc-sublist__connector" aria-hidden="true"></span>
+      <a class="post-toc-sublist__link" href={`#${item.slug}`} data-toc-link data-slug={item.slug} title={item.text}>
+        {item.text}
+      </a>
+
+      {item.children.length > 0 && (
+        <Astro.self items={item.children} listClass="post-toc-sublist post-toc-sublist--nested" />
+      )}
+    </li>
+  ))}
+</ol>
+
+<style>
+  .post-toc-sublist {
+    display: none;
+    position: relative;
+    gap: var(--toc-row-gap);
+    margin: 0 0 0.78rem calc(var(--toc-axis-x) + 0.9rem);
+    padding: var(--toc-list-start-gap) 0 0;
+    list-style: none;
+    --toc-branch-color: color-mix(in srgb, var(--post-accent) 25%, var(--border-soft));
+    --toc-branch-size: 0.94rem;
+    --toc-elbow-y: 0.72rem;
+    --toc-list-start-gap: 0.18rem;
+    --toc-row-gap: 0.08rem;
+    --toc-link-pad-x: 0.48rem;
+    --toc-child-list-gap: 0.20rem;
+  }
+
+  :global(.post-toc-section.is-active) > .post-toc-sublist {
+    display: grid;
+  }
+
+  .post-toc-sublist--nested {
+    display: grid;
+    grid-area: children;
+    margin: var(--toc-child-list-gap) 0 0.16rem var(--toc-link-pad-x);
+    --toc-branch-size: 0.98rem;
+    --toc-elbow-y: 0.62rem;
+    --toc-list-start-gap: 0.12rem;
+    --toc-row-gap: 0.02rem;
+    --toc-link-pad-x: 0.42rem;
+  }
+
+  .post-toc-sublist::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: calc(var(--toc-list-start-gap) + var(--toc-elbow-y));
+    border-left: 1.5px dashed var(--toc-branch-color);
+    pointer-events: none;
+  }
+
+  .post-toc-sublist--nested::before {
+    display: none;
+  }
+
+  .post-toc-sublist__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--toc-branch-size) minmax(0, 1fr);
+    grid-template-areas:
+      'connector link'
+      'connector children';
+    max-inline-size: none;
+    padding-inline-start: 0;
+  }
+
+  .post-toc-sublist__connector {
+    grid-area: connector;
+    position: relative;
+    min-width: var(--toc-branch-size);
+  }
+
+  .post-toc-sublist__connector::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--toc-elbow-y);
+    border-top: 1.5px dashed var(--toc-branch-color);
+    pointer-events: none;
+  }
+
+  .post-toc-sublist > .post-toc-sublist__item:not(:last-child) > .post-toc-sublist__connector::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: var(--toc-elbow-y);
+    bottom: calc(-1 * (var(--toc-row-gap) + var(--toc-elbow-y)));
+    border-left: 1.5px dashed var(--toc-branch-color);
+    pointer-events: none;
+  }
+
+  .post-toc-sublist__link {
+    grid-area: link;
+    position: relative;
+    display: block;
+    min-width: 0;
+    padding: 0.38rem var(--toc-link-pad-x);
+    border-radius: 0.72rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    overflow-wrap: normal;
+    text-wrap: wrap;
+    transition: color 160ms ease, background-color 160ms ease;
+  }
+
+  .post-toc-sublist__item.has-children > .post-toc-sublist__link::before {
+    content: '';
+    position: absolute;
+    left: var(--toc-link-pad-x);
+    top: calc(100% - 0.08rem);
+    height: calc(var(--toc-child-list-gap) + var(--toc-list-start-gap) + var(--toc-elbow-y) + 0.08rem);
+    border-left: 1.5px dashed var(--toc-branch-color);
+    pointer-events: none;
+  }
+
+  .post-toc-sublist__link:hover,
+  .post-toc-sublist__link:focus-visible {
+    color: var(--post-accent);
+    background: color-mix(in srgb, var(--accent-soft) 72%, transparent);
+    outline: none;
+  }
+
+  .post-toc-sublist__item[data-depth='4'] > .post-toc-sublist__link {
+    font-size: 0.94rem;
+    color: color-mix(in srgb, var(--text-secondary) 88%, var(--text-muted));
+  }
+
+  .post-toc-sublist__item[data-depth='5'] > .post-toc-sublist__link,
+  .post-toc-sublist__item[data-depth='6'] > .post-toc-sublist__link {
+    font-size: 0.9rem;
+    color: color-mix(in srgb, var(--text-secondary) 78%, var(--text-muted));
+  }
+
+  .post-toc-sublist__link.is-active {
+    color: var(--post-accent);
+    background: color-mix(in srgb, var(--accent-soft) 82%, var(--surface-main));
+    font-weight: 650;
+  }
+</style>

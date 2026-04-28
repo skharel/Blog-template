@@ -1,0 +1,461 @@
+---
+import { ArrowRight, CarFront, Leaf, Orbit, Rocket } from '@lucide/astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { formatDate } from '../../../utils/date';
+import { getPostTopic, getPostUrl, getPublishedPosts, getTopicUrl } from '../../../utils/posts';
+import { getReadingTime } from '../../../utils/readingTime';
+import { getTopicMeta, topics } from '../../../utils/topics';
+
+const iconMap = {
+  space: Orbit,
+  rocket: Rocket,
+  nature: Leaf,
+  cars: CarFront,
+} as const;
+
+const mediaClasses = {
+  space: 'topic-page__thumb--space',
+  rocket: 'topic-page__thumb--rocket',
+  nature: 'topic-page__thumb--nature',
+  cars: 'topic-page__thumb--cars',
+} as const;
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  const topicKeys = [...new Set(posts.map((post) => getPostTopic(post)))];
+
+  return topicKeys.map((topic) => ({ params: { topic } }));
+}
+
+const { topic } = Astro.params;
+const posts = await getPublishedPosts();
+const topicPosts = posts.filter((post) => getPostTopic(post) === topic);
+
+if (topicPosts.length === 0) {
+  return Astro.redirect('/');
+}
+
+const topicMeta = getTopicMeta(topic!);
+---
+
+<BaseLayout chrome="home" title={`${topicMeta.title} | The Distributed Mind`}>
+  <section class:list={['topic-page', `topic-page--${topicMeta.key}`]}>
+    <aside class="topic-page__sidebar">
+      <p class="topic-page__eyebrow">Topics</p>
+      <div class="topic-page__topic-list">
+        {topics.map((entry) => {
+          const Icon = iconMap[entry.key];
+
+          return (
+            <a class:list={['topic-page__topic-link', entry.key === topic && 'is-active']} href={getTopicUrl(entry.key)}>
+              <span class="topic-page__topic-icon">
+                <Icon size={16} />
+              </span>
+              <span>{entry.title}</span>
+              <span class="topic-page__topic-count">
+                {posts.filter((post) => getPostTopic(post) === entry.key).length}
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </aside>
+
+    <main class="topic-page__main">
+      <header class="topic-page__header">
+        <div class="topic-page__hero-inner">
+          <p class="topic-page__eyebrow">Topic</p>
+          <h1>{topicMeta.title}</h1>
+          <span class="topic-page__accent" aria-hidden="true"></span>
+          <p class="topic-page__hero-copy">{topicMeta.description}</p>
+        </div>
+      </header>
+
+      <section class="topic-page__posts">
+        <div class="topic-page__posts-container">
+          <div class="topic-page__grid">
+            {topicPosts.map((post) => (
+              <article class="topic-page__card">
+                <a class:list={['topic-page__thumb', mediaClasses[topicMeta.key]]} href={getPostUrl(post)} aria-label={post.data.title}>
+                  <span class="topic-page__glow" aria-hidden="true"></span>
+                </a>
+                <div class="topic-page__body">
+                  <p class="topic-page__meta">
+                    <span>{formatDate(post.data.pubDate)}</span>
+                    <span>{getReadingTime(post.body)} min read</span>
+                  </p>
+                  <h2>
+                    <a href={getPostUrl(post)}>{post.data.title}</a>
+                  </h2>
+                  <a class="topic-page__arrow" href={getPostUrl(post)} aria-label={`Read ${post.data.title}`}>
+                    <ArrowRight size={22} />
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <style>
+    .topic-page {
+      width: 100%;
+      margin: 0;
+      padding: 2rem 0 4rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.9rem;
+      align-items: start;
+    }
+
+    .topic-page__sidebar {
+      width: min(calc(100% - 4rem), 76rem);
+      margin: 0 auto;
+      display: grid;
+      gap: 1.1rem;
+    }
+
+    .topic-page__eyebrow {
+      margin: 0;
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .topic-page__topic-list {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(8rem, 1fr));
+      gap: 1rem;
+    }
+
+    .topic-page__topic-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.9rem;
+      min-height: 3.6rem;
+      padding: 0.95rem 1.2rem;
+      border: 1px solid var(--border-soft);
+      border-radius: 0.7rem;
+      background: color-mix(in srgb, var(--surface-main) 80%, var(--page-bg));
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .topic-page__topic-link.is-active {
+      background: var(--accent-soft);
+      border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+
+    .topic-page__topic-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+
+    .topic-page__topic-count {
+      display: none;
+    }
+
+    .topic-page__main {
+      display: grid;
+      gap: 0;
+      min-width: 0;
+    }
+
+    .topic-page__header {
+      width: 100%;
+      min-height: clamp(24rem, 48vw, 38rem);
+      display: grid;
+      align-items: start;
+      overflow: hidden;
+      position: relative;
+      z-index: 0;
+      isolation: isolate;
+      background:
+        linear-gradient(90deg, var(--page-bg) 0%, color-mix(in srgb, var(--page-bg) 90%, transparent) 34%, transparent 62%),
+        linear-gradient(180deg, color-mix(in srgb, var(--page-bg) 95%, white) 0%, color-mix(in srgb, var(--accent-soft) 60%, var(--page-bg)) 100%);
+    }
+
+    .topic-page__header::before,
+    .topic-page__header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .topic-page__header::before {
+      background:
+        radial-gradient(ellipse at 75% 65%, color-mix(in srgb, var(--accent) 32%, transparent) 0 8%, transparent 30%),
+        linear-gradient(155deg, transparent 0 48%, color-mix(in srgb, var(--accent) 12%, transparent) 49% 55%, transparent 56%),
+        linear-gradient(150deg, transparent 0 55%, color-mix(in srgb, var(--accent) 18%, transparent) 56% 65%, transparent 66%),
+        linear-gradient(145deg, transparent 0 62%, color-mix(in srgb, var(--accent) 24%, transparent) 63% 76%, transparent 77%);
+      opacity: 0.95;
+    }
+
+    .topic-page__header::after {
+      background:
+        linear-gradient(176deg, transparent 0 60%, color-mix(in srgb, var(--accent) 18%, var(--surface-panel)) 61% 74%, transparent 75%),
+        linear-gradient(180deg, transparent 0 70%, color-mix(in srgb, var(--text-primary) 30%, transparent) 71% 100%);
+      opacity: 0.34;
+    }
+
+    .topic-page__hero-inner {
+      width: min(calc(100% - 4rem), 76rem);
+      margin: 0 auto;
+      padding: clamp(2.4rem, 4vw, 3.4rem) 0 4.5rem;
+      display: grid;
+      gap: 1.05rem;
+      align-content: start;
+    }
+
+    .topic-page__header h1,
+    .topic-page__hero-copy,
+    .topic-page__meta,
+    .topic-page__body h2 {
+      margin: 0;
+    }
+
+    .topic-page__header h1 {
+      max-width: 9ch;
+      font-size: clamp(4.5rem, 11vw, 8.5rem);
+      font-weight: 800;
+      line-height: 0.88;
+      letter-spacing: -0.05em;
+      color: var(--text-primary);
+    }
+
+    .topic-page__accent {
+      width: 2.7rem;
+      height: 0.18rem;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .topic-page__hero-copy {
+      max-width: 31rem;
+      color: var(--text-primary);
+      font-size: clamp(1.08rem, 1.6vw, 1.3rem);
+      line-height: 1.55;
+    }
+
+    .topic-page--cars .topic-page__header::before {
+      background:
+        radial-gradient(ellipse at 76% 65%, rgba(15, 12, 24, 0.92) 0 6%, transparent 22%),
+        radial-gradient(ellipse at 81% 58%, color-mix(in srgb, var(--accent) 48%, transparent) 0 3%, transparent 19%),
+        linear-gradient(155deg, transparent 0 48%, color-mix(in srgb, var(--accent) 12%, transparent) 49% 55%, transparent 56%),
+        linear-gradient(150deg, transparent 0 55%, color-mix(in srgb, var(--accent) 18%, transparent) 56% 65%, transparent 66%),
+        linear-gradient(145deg, transparent 0 62%, color-mix(in srgb, var(--accent) 24%, transparent) 63% 76%, transparent 77%);
+    }
+
+    .topic-page__posts {
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .topic-page__posts-container {
+      position: relative;
+      isolation: isolate;
+      width: min(calc(100% - 2rem), 84rem);
+      margin: -1.25rem auto 0;
+      padding: 1rem;
+      display: grid;
+      gap: 0;
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-soft));
+      border-radius: 0.75rem;
+      background: transparent;
+      box-shadow:
+        inset 0 1px 0 color-mix(in srgb, white 62%, transparent),
+        0 22px 54px -34px color-mix(in srgb, var(--accent) 34%, transparent);
+    }
+
+    .topic-page__posts-container::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: inherit;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 55%, var(--surface-main)) 0%, var(--surface-panel) 100%);
+    }
+
+    .topic-page__grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+
+    .topic-page__card {
+      min-width: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      border: 1px solid var(--border-soft);
+      border-radius: 0.7rem;
+      background: color-mix(in srgb, var(--surface-main) 86%, var(--page-bg));
+    }
+
+    .topic-page__thumb {
+      position: relative;
+      display: block;
+      overflow: hidden;
+      min-height: 10.2rem;
+      text-decoration: none;
+    }
+
+    .topic-page__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .topic-page__meta span + span::before {
+      content: '•';
+      margin-right: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .topic-page__body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.55rem 0.75rem;
+      align-content: start;
+      align-items: start;
+      min-width: 0;
+      padding: 0.95rem 1.1rem 1rem;
+    }
+
+    .topic-page__meta,
+    .topic-page__body h2 {
+      grid-column: 1 / -1;
+    }
+
+    .topic-page__body h2 {
+      font-size: clamp(1.45rem, 2vw, 1.85rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .topic-page__body h2 a {
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .topic-page__arrow {
+      justify-self: end;
+      align-self: start;
+      width: 2.4rem;
+      height: 2.4rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: -0.2rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      text-decoration: none;
+      line-height: 1;
+    }
+
+    .topic-page__thumb--space {
+      background:
+        radial-gradient(circle at 30% 28%, rgba(255, 243, 215, 0.96), transparent 26%),
+        linear-gradient(160deg, #12162f 0%, #314a7e 52%, #d9d1ea 100%);
+    }
+
+    .topic-page__thumb--rocket {
+      background:
+        linear-gradient(180deg, #89a8d8 0%, #b7d4f7 48%, #ffe2c0 100%);
+    }
+
+    .topic-page__thumb--nature {
+      background:
+        linear-gradient(145deg, #182b18 0%, #315b2f 35%, #8fa45b 72%, #d5c382 100%);
+    }
+
+    .topic-page__thumb--cars {
+      background:
+        linear-gradient(145deg, #1a1a1f 0%, #38363d 48%, #d0b487 100%);
+    }
+
+    .topic-page__glow {
+      position: absolute;
+      inset: auto auto 1rem 1rem;
+      width: 5rem;
+      height: 5rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      filter: blur(18px);
+    }
+
+    @media (max-width: 1024px) {
+      .topic-page__topic-list {
+        display: flex;
+        gap: 0.75rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .topic-page__topic-list::-webkit-scrollbar {
+        display: none;
+      }
+
+      .topic-page__topic-link {
+        min-width: max-content;
+      }
+
+      .topic-page__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topic-page {
+        padding-top: 2rem;
+      }
+
+      .topic-page__sidebar,
+      .topic-page__hero-inner {
+        width: min(calc(100% - 2rem), 76rem);
+      }
+
+      .topic-page__posts-container {
+        width: min(calc(100% - 1rem), 84rem);
+      }
+
+      .topic-page__posts-container {
+        margin-top: -0.85rem;
+        padding: 0.85rem;
+      }
+
+      .topic-page__header {
+        min-height: 27rem;
+      }
+
+      .topic-page__grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .topic-page__thumb {
+        min-height: 9.8rem;
+      }
+
+      .topic-page__arrow {
+        justify-self: end;
+      }
+    }
+  </style>
+</BaseLayout>
