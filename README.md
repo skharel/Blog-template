@@ -34,6 +34,10 @@ See it for your self!
 
 
 - [Markdown + D3 → interactive content](https://blog-template-5f0.pages.dev/topic/space/solar-system/)
+    - [Peek the source code](./src/content/posts/space/solar-system.md?plain=1)
+
+
+- [More ealborate setup](./src/content/posts/space/stars/)
 
 
 **How it works**
@@ -41,6 +45,7 @@ See it for your self!
 1. Write in Markdown  
 2. Drop into a topic folder  
 3. It becomes a clean, responsive page
+
 ---
 
 ## 🛠️ How to use
